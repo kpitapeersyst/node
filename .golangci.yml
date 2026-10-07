@@ -7,10 +7,14 @@ linters:
   default: none
   enable:
     - asciicheck
+    - bidichk
     - copyloopvar
     - dogsled
     - dupl
     - errcheck
+    - errorlint
+    - exhaustive
+    - forbidigo
     - goconst
     - gocritic
     - gomodguard
@@ -19,6 +23,8 @@ linters:
     - ineffassign
     - misspell
     - nakedret
+    - nilerr
+    - nilnesserr
     - nolintlint
     - prealloc
     - revive
@@ -29,6 +35,19 @@ linters:
   settings:
     dogsled:
       max-blank-identifiers: 3
+    errcheck:
+      # An unchecked type assertion panics, which can halt the chain in BeginBlock or EndBlock
+      check-type-assertions: true
+    exhaustive:
+      # A switch with a default case already handles every enum value
+      default-signifies-exhaustive: true
+    forbidigo:
+      forbid:
+        - pattern: ^time\.(Now|Since|Until)$
+          msg: wall-clock time is non-deterministic, use the block time from sdk.Context instead
+    govet:
+      enable:
+        - nilness
     gomodguard:
       blocked:
         versions:
@@ -55,21 +74,26 @@ linters:
       - common-false-positives
       - legacy
       - std-error-handling
+    warn-unused: true
     rules:
+      # The wall-clock ban only applies to state machine code
+      - linters:
+          - forbidigo
+        path-except: ^(app|x)/
+      - linters:
+          - forbidigo
+        path: (_test\.go|/simulation/)
       # Renaming the existing utils/types packages is not worth the churn
       - linters:
           - revive
         text: "var-naming: avoid meaningless package names"
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
+issues:
+  # Report every finding instead of capping them per linter, per message or per line
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  uniq-by-line: false
 formatters:
   enable:
     - gofumpt
   exclusions:
     generated: lax
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
