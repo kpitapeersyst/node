@@ -3,7 +3,7 @@ run:
   concurrency: 4
   tests: true
 linters:
-  # Only the linters listed below run; nothing is enabled implicitly
+  # Only the linters listed below run, nothing is enabled implicitly
   default: none
   enable:
     - asciicheck
